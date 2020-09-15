@@ -1,0 +1,6 @@
+.vscode
+tmp
+*.pptx
+*.txt
+*.exe
+*.o
