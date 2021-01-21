@@ -9,16 +9,21 @@
  *
  */
 #include <iostream>
-
+#include <random>
+#define NDEBUG
 #include "./FibonacciHeap.h"
 
 int main() {
-  fib::FibonacciHeap<int> f;
-  for (int i = 100; i > 0; i--) {
-    f.insert(i);
-  }
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<int> dis(0, 999999);
 
-  for (int i = 0; i <= 100; i++) {
-    std::cout << f.extractMin() << "\n";
+  fib::FibonacciHeap<int> f;
+  for (int i = 0; i < 1000000; i++) {
+    if (dis(gen) < 300000 && f.size() > 0) {
+      std::cout << f.extractMin() << "\n";
+    } else {
+      f.insert(dis(gen));
+    }
   }
 }

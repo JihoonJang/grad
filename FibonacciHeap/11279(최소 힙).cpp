@@ -1,18 +1,103 @@
-/**
- * @file FibonacciHeap.cpp
- * @author jhjang
- * @brief
- * @version 0.1
- * @date 2021-01-19
- *
- * @copyright Copyright (c) 2021
- *
- */
-#include "./FibonacciHeap.h"
+#include <iostream>
+
+#define NDEBUG
+
+#ifndef FIBONACCIHEAP_H_
+#define FIBONACCIHEAP_H_
+
+#include <unordered_map>
+#include <unordered_set>
+
+namespace fib {
+template <typename ValType>
+class Node {
+ public:
+  int degree;
+  Node<ValType> *left, *right, *parent, *child;
+  ValType val;
+  bool mark;
+  explicit Node(ValType val)
+      : left(this),
+        right(this),
+        parent(nullptr),
+        child(nullptr),
+        val(val),
+        degree(0),
+        mark(false) {}
+  void insertSiblings(Node<ValType> *siblings);
+  void removeSelfFromSiblings();
+  void insertChild(Node<ValType> *child);
+  void eraseChild(Node<ValType> *child);
+
+  bool checkValidity();
+  int getDoublyLinkedListSize();
+  int getChildDoublyLinkedListSize();
+  void deleteAllNodes();
+};
+
+template <typename ValType>
+class FibonacciHeap {
+ private:
+  Node<ValType> *min_;
+  int num_nodes_;
+  std::unordered_map<ValType, std::unordered_set<Node<ValType> *>>
+      value_to_ptr_;
+
+  void consolidate();
+  void heapLink(Node<ValType> *y, Node<ValType> *x);
+  void cut(Node<ValType> *x, Node<ValType> *y);
+  void cascadingCut(Node<ValType> *y);
+
+ public:
+  FibonacciHeap() : min_(nullptr), num_nodes_(0) {}
+  ~FibonacciHeap();
+
+  bool includes(ValType const &val);
+  int size();
+
+  void insert(ValType val);
+  ValType findMin() const;
+  ValType extractMin();
+  void decreaseKey(ValType const &prev_key, ValType key,
+                   bool is_delete = false);
+  void erase(ValType const &key);
+};
+}  // namespace fib
 
 #include <vector>
 
-#include "./debug.h"
+#ifndef DEBUG_H_
+#define DEBUG_H_
+
+#include <cassert>
+#ifndef NDEBUG
+
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_BLUE "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN "\x1b[36m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+
+#define debug_print(fmt, ...)          \
+  {                                    \
+    fprintf(stderr, ANSI_COLOR_CYAN);  \
+    fprintf(stderr, fmt, __VA_ARGS__); \
+    fprintf(stderr, ANSI_COLOR_RESET); \
+    fprintf(stderr, "\n");             \
+  }
+
+constexpr bool _DEBUG = true;
+
+#else
+
+constexpr bool _DEBUG = false;
+
+#define debug_print(fmt, ...)
+
+#endif  // NDEBUG
+#endif  // DEBUG_H_
 
 namespace fib {
 template <typename ValType>
@@ -280,3 +365,26 @@ void FibonacciHeap<ValType>::erase(ValType const &key) {
   assert(tmp == ValType(0));
 }
 }  // namespace fib
+
+#endif  // FIBONACCIHEAP_H_
+
+int main() {
+  fib::FibonacciHeap<int> f;
+  std::cin.tie(NULL);
+  std::cout.tie(NULL);
+  std::ios::sync_with_stdio(false);
+
+  int n, val;
+  std::cin >> n;
+  for (size_t i = 0; i < n; i++) {
+    std::cin >> val;
+    if (val > 0) {
+      f.insert(val);
+    } else {
+      if (f.size() > 0)
+        std::cout << f.extractMin() << "\n";
+      else
+        std::cout << 0 << "\n";
+    }
+  }
+}
