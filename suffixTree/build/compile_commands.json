@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/ubuntu/wsl/grad/suffixTree/build",
+  "command": "/bin/g++-9    -g -fno-omit-frame-pointer -fsanitize=address   -std=c++17 -o CMakeFiles/main.out.dir/main.cc.o -c /home/ubuntu/wsl/grad/suffixTree/main.cc",
+  "file": "/home/ubuntu/wsl/grad/suffixTree/main.cc"
+},
+{
+  "directory": "/home/ubuntu/wsl/grad/suffixTree/build",
+  "command": "/bin/g++-9    -g -fno-omit-frame-pointer -fsanitize=address   -std=c++17 -o CMakeFiles/main.out.dir/SuffixTree.cc.o -c /home/ubuntu/wsl/grad/suffixTree/SuffixTree.cc",
+  "file": "/home/ubuntu/wsl/grad/suffixTree/SuffixTree.cc"
+}
+]

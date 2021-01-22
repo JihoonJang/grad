@@ -12,6 +12,7 @@
 #define SUFFIXTREE_H_
 
 #define NDEBUG
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -54,6 +55,7 @@ class SufTreeNode {
   SufTreeNode *split(SufTreeNode *child, int k);
   SufTreeString getLocusString();
   int getLocusBegin() const;
+  void deleteAllNodes();
 };
 
 class SuffixTree {
@@ -70,6 +72,7 @@ class SuffixTree {
 
  public:
   SuffixTree(char *str, int size);
+  ~SuffixTree();
 
   bool search(char *str, int size);
   int getSizeOfLargestRepeatedSubstr(SufTreeNode *cur = NULL);

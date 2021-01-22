@@ -1,18 +1,103 @@
-/**
- * @file FibonacciHeap.cpp
- * @author jhjang
- * @brief
- * @version 0.1
- * @date 2021-01-19
- *
- * @copyright Copyright (c) 2021
- *
- */
-#include "./FibonacciHeap.h"
+#include <iostream>
+
+#define NDEBUG
+
+#ifndef FIBONACCIHEAP_H_
+#define FIBONACCIHEAP_H_
+
+#include <unordered_map>
+#include <unordered_set>
+
+namespace fib {
+template <typename ValType>
+class Node {
+ public:
+  int degree;
+  Node<ValType> *left, *right, *parent, *child;
+  ValType val;
+  bool mark;
+  explicit Node(ValType val)
+      : left(this),
+        right(this),
+        parent(nullptr),
+        child(nullptr),
+        val(val),
+        degree(0),
+        mark(false) {}
+  void insertSiblings(Node<ValType> *siblings);
+  void removeSelfFromSiblings();
+  void insertChild(Node<ValType> *child);
+  void eraseChild(Node<ValType> *child);
+
+  bool checkValidity();
+  int getDoublyLinkedListSize();
+  int getChildDoublyLinkedListSize();
+  void deleteAllNodes();
+};
+
+template <typename ValType>
+class FibonacciHeap {
+ private:
+  Node<ValType> *min_;
+  int num_nodes_;
+  std::unordered_map<ValType, std::unordered_set<Node<ValType> *>>
+      value_to_ptr_;
+
+  void consolidate();
+  void heapLink(Node<ValType> *y, Node<ValType> *x);
+  void cut(Node<ValType> *x, Node<ValType> *y);
+  void cascadingCut(Node<ValType> *y);
+
+ public:
+  FibonacciHeap() : min_(nullptr), num_nodes_(0) {}
+  ~FibonacciHeap();
+
+  bool includes(ValType const &val);
+  int size();
+
+  void insert(ValType val);
+  ValType findMin() const;
+  ValType extractMin();
+  void decreaseKey(ValType const &prev_key, ValType key,
+                   bool is_delete = false);
+  void erase(ValType const &key);
+};
+}  // namespace fib
 
 #include <vector>
 
-#include "./debug.h"
+#ifndef DEBUG_H_
+#define DEBUG_H_
+
+#include <cassert>
+#ifndef NDEBUG
+
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_BLUE "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN "\x1b[36m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+
+#define debug_print(fmt, ...)          \
+  {                                    \
+    fprintf(stderr, ANSI_COLOR_CYAN);  \
+    fprintf(stderr, fmt, __VA_ARGS__); \
+    fprintf(stderr, ANSI_COLOR_RESET); \
+    fprintf(stderr, "\n");             \
+  }
+
+constexpr bool _DEBUG = true;
+
+#else
+
+constexpr bool _DEBUG = false;
+
+#define debug_print(fmt, ...)
+
+#endif  // NDEBUG
+#endif  // DEBUG_H_
 
 namespace fib {
 template <typename ValType>
@@ -130,7 +215,7 @@ void FibonacciHeap<ValType>::consolidate() {
     if (d >= arr.size()) arr.resize(d + 1, nullptr);
     while (arr[d] != nullptr) {
       Node<ValType> *y = arr[d];
-      if (y->val < x->val) std::swap(x, y);
+      if (x->val > y->val) std::swap(x, y);
       this->heapLink(y, x);
       arr[d] = nullptr;
       d += 1;
@@ -280,3 +365,74 @@ void FibonacciHeap<ValType>::erase(ValType const &key) {
   assert(tmp == ValType(0));
 }
 }  // namespace fib
+
+#endif  // FIBONACCIHEAP_H_
+
+inline uint64_t getHeapItem(uint32_t dist, uint32_t dest) {
+  return (static_cast<uint64_t>(dist) << 32) | static_cast<uint64_t>(dest);
+}
+
+inline uint32_t getDistance(uint64_t item) {
+  return static_cast<uint32_t>(item >> 32);
+}
+
+inline uint32_t getDestination(uint64_t item) {
+  return static_cast<uint32_t>((item << 32) >> 32);
+}
+
+struct edge {
+  uint32_t cost, dest;
+  edge(uint32_t dest, uint32_t cost) : dest(dest), cost(cost) {}
+};
+
+constexpr uint32_t INF = 1 << 31;
+
+int main() {
+  std::cin.tie(NULL);
+  std::cout.tie(NULL);
+  std::ios::sync_with_stdio(false);
+
+  fib::FibonacciHeap<uint64_t> fheap;
+
+  uint32_t V, E;
+  uint32_t start;
+
+  std::cin >> V >> E >> start;
+
+  std::vector<std::vector<edge>> adj(V + 1);
+
+  for (uint32_t i = 0; i < E; i++) {
+    uint32_t u, v, cost;
+    std::cin >> u >> v >> cost;
+    adj[u].push_back(edge(v, cost));
+  }
+
+  std::vector<uint32_t> shortestDist(V + 1, INF);
+  shortestDist[start] = 0;
+
+  for (uint32_t i = 1; i <= V; i++) {
+    fheap.insert(getHeapItem(shortestDist[i], i));
+  }
+
+  while (fheap.size() > 0) {
+    uint64_t item = fheap.extractMin();
+    uint32_t dist = getDistance(item), cur = getDestination(item);
+    // std::cout << dist << " " << cur << "\n";
+    for (auto &edge : adj[cur]) {
+      uint32_t next = edge.dest, cost = edge.cost;
+      uint32_t alt = shortestDist[cur] + cost;
+      if (alt < shortestDist[next]) {
+        fheap.decreaseKey(getHeapItem(shortestDist[next], next),
+                          getHeapItem(alt, next));
+        shortestDist[next] = alt;
+      }
+    }
+  }
+
+  for (uint32_t i = 1; i <= V; i++) {
+    if (shortestDist[i] == INF)
+      std::cout << "INF\n";
+    else
+      std::cout << shortestDist[i] << "\n";
+  }
+}

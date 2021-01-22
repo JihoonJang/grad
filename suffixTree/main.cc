@@ -9,6 +9,8 @@
  *
  */
 
+#include <random>
+
 #include "./SuffixTree.h"
 
 int main() {
@@ -16,10 +18,17 @@ int main() {
   std::cout.tie(NULL);
   std::ios::sync_with_stdio(false);
 
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<char> dis('a', 'z');
+
   int size;
   char s[200001];
 
-  std::cin >> size >> s;
+  size = 200000;
+  for (int i = 0; i < size; i++) {
+    s[i] = dis(gen);
+  }
 
   SuffixTree st(s, size);
   std::cout << st.getSizeOfLargestRepeatedSubstr();

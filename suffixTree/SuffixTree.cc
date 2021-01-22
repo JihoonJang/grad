@@ -71,6 +71,13 @@ int SufTreeNode::getLocusBegin() const {
   return this->arc_string.end - this->_locus_string_size;
 }
 
+void SufTreeNode::deleteAllNodes() {
+  for (auto child : this->children) {
+    child.second->deleteAllNodes();
+  }
+  delete this;
+}
+
 SufTreeNode* SuffixTree::_rescan(SufTreeNode* n, SufTreeString b) {
   int l = 1;
   while (l <= b.size()) {
@@ -172,6 +179,8 @@ SuffixTree::SuffixTree(char* str, int size) {
     head_locus = ht.first;
   }
 }
+
+SuffixTree::~SuffixTree() { this->_root->deleteAllNodes(); }
 
 bool SuffixTree::search(char* str, int size) {
   return _dfs_search(_root, SufTreeString(str, 1, size + 1));
